@@ -2,8 +2,10 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { FileText, Map, HelpCircle, Clock, Sparkles } from 'lucide-react';
+import { FileText, Map, HelpCircle, Clock, Sparkles, Network } from 'lucide-react';
+import { KnowledgeGraph } from './KnowledgeGraph';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface FeaturePanelProps {
   extractedText: string;
@@ -20,12 +22,52 @@ export const FeaturePanel: React.FC<FeaturePanelProps> = ({
 }) => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResults, setAnalysisResults] = useState<Record<string, any>>({});
+  const { toast } = useToast();
 
   const analyzeContent = async (feature: string) => {
     setIsAnalyzing(true);
     onFeatureSelect(feature);
     
-    // Simulate AI analysis
+    if (feature === 'knowledge-graph') {
+      try {
+        console.log('Calling knowledge graph API...');
+        const { data, error } = await supabase.functions.invoke('generate-knowledge-graph', {
+          body: { text: extractedText }
+        });
+
+        if (error) {
+          console.error('Supabase function error:', error);
+          throw error;
+        }
+
+        console.log('Knowledge graph response:', data);
+        
+        setAnalysisResults(prev => ({
+          ...prev,
+          'knowledge-graph': {
+            title: "Knowledge Graph",
+            content: data.knowledgeGraph
+          }
+        }));
+
+        toast({
+          title: "Knowledge Graph tạo thành công!",
+          description: "Sơ đồ tri thức đã được tạo từ nội dung văn bản.",
+        });
+      } catch (error) {
+        console.error('Error generating knowledge graph:', error);
+        toast({
+          title: "Lỗi tạo Knowledge Graph",
+          description: "Không thể tạo sơ đồ tri thức. Vui lòng thử lại.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsAnalyzing(false);
+      }
+      return;
+    }
+    
+    // Simulate AI analysis for other features
     setTimeout(() => {
       const mockResults = {
         summary: {
@@ -112,7 +154,7 @@ Cuốn sách phù hợp cho người mới bắt đầu và có kinh nghiệm tr
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
             <Button
               variant={activeFeature === 'summary' ? 'default' : 'outline'}
               onClick={() => analyzeContent('summary')}
@@ -129,6 +171,15 @@ Cuốn sách phù hợp cho người mới bắt đầu và có kinh nghiệm tr
             >
               <Map className="w-6 h-6" />
               <span>Mind Map</span>
+            </Button>
+            
+            <Button
+              variant={activeFeature === 'knowledge-graph' ? 'default' : 'outline'}
+              onClick={() => analyzeContent('knowledge-graph')}
+              className="flex flex-col items-center space-y-2 h-auto py-4"
+            >
+              <Network className="w-6 h-6" />
+              <span>Knowledge Graph</span>
             </Button>
             
             <Button
@@ -159,7 +210,12 @@ Cuốn sách phù hợp cho người mới bắt đầu và có kinh nghiệm tr
               <div className="flex items-center justify-center py-12">
                 <div className="text-center">
                   <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                  <p className="text-gray-600">Đang phân tích nội dung với AI...</p>
+                  <p className="text-gray-600">
+                    {activeFeature === 'knowledge-graph' 
+                      ? 'Đang tạo Knowledge Graph với Google AI...' 
+                      : 'Đang phân tích nội dung với AI...'
+                    }
+                  </p>
                 </div>
               </div>
             ) : analysisResults[activeFeature] ? (
@@ -168,7 +224,9 @@ Cuốn sách phù hợp cho người mới bắt đầu và có kinh nghiệm tr
                   {analysisResults[activeFeature].title}
                 </h3>
                 
-                {activeFeature === 'faq' ? (
+                {activeFeature === 'knowledge-graph' ? (
+                  <KnowledgeGraph data={analysisResults[activeFeature].content} />
+                ) : activeFeature === 'faq' ? (
                   <div className="space-y-4">
                     {analysisResults[activeFeature].content.map((item: any, index: number) => (
                       <div key={index} className="border rounded-lg p-4">

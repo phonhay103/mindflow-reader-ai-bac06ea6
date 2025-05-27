@@ -17,17 +17,35 @@ const Index = () => {
     setIsLoading(true);
     try {
       setUploadedFile(file);
-      // Simulate PDF text extraction (in real app, you'd use pdf-parse)
-      const mockText = `Đây là nội dung được trích xuất từ file PDF: ${file.name}. 
-      Nội dung sách bao gồm các chương về AI, machine learning, và các ứng dụng thực tế. 
-      Cuốn sách cung cấp kiến thức cơ bản về trí tuệ nhân tạo và cách áp dụng vào cuộc sống.`;
+      
+      // Simulate PDF text extraction with more comprehensive sample text
+      const mockText = `Trí tuệ nhân tạo (AI) đang thay đổi thế giới một cách mạnh mẽ và toàn diện. Cuốn sách này khám phá những tiến bộ vượt bậc trong lĩnh vực AI và Machine Learning, từ những khái niệm cơ bản đến các ứng dụng phức tạp trong thực tế.
+
+Chương 1: Giới thiệu về Trí tuệ Nhân tạo
+Trí tuệ nhân tạo là khả năng của máy tính để thực hiện các tác vụ thường yêu cầu trí thông minh của con người. Lịch sử phát triển AI bắt đầu từ những năm 1950 với Alan Turing và bài kiểm tra Turing nổi tiếng. Từ đó đến nay, AI đã trải qua nhiều giai đoạn phát triển, từ AI hẹp (Narrow AI) đến AI tổng quát (General AI) và siêu trí tuệ (Superintelligence).
+
+Chương 2: Machine Learning và Deep Learning
+Machine Learning là một nhánh của AI cho phép máy tính học hỏi từ dữ liệu mà không cần được lập trình cụ thể. Có ba loại chính: học có giám sát (Supervised Learning), học không giám sát (Unsupervised Learning), và học tăng cường (Reinforcement Learning). Deep Learning, một nhánh của Machine Learning, sử dụng mạng nơ-ron nhân tạo để mô phỏng cách thức hoạt động của não người.
+
+Chương 3: Ứng dụng AI trong Thực tế
+AI đang được ứng dụng rộng rãi trong nhiều lĩnh vực: y tế (chẩn đoán hình ảnh, phát hiện bệnh), giao thông (xe tự lái), tài chính (phát hiện gian lận, trading), giáo dục (học tập cá nhân hóa), và giải trí (trò chơi, content creation).
+
+Chương 4: Thách thức và Cơ hội
+Trong khi AI mang lại nhiều lợi ích, nó cũng đặt ra những thách thức về đạo đức, an toàn, và tác động xã hội. Vấn đề bias trong dữ liệu, sự thay thế lao động, và quyền riêng tư là những mối quan tâm chính. Tuy nhiên, nếu được phát triển và sử dụng đúng cách, AI có thể giải quyết nhiều vấn đề toàn cầu như biến đổi khí hậu, nghèo đói, và bệnh tật.
+
+Chương 5: Tương lai của AI
+Tương lai của AI hứa hẹn những đột phá đáng kinh ngạc. AI có thể trở thành đối tác đáng tin cậy trong nghiên cứu khoa học, phát triển thuốc mới, và giải quyết các vấn đề phức tạp. Tuy nhiên, việc đảm bảo AI an toàn và có lợi cho toàn nhân loại là trách nhiệm của tất cả chúng ta.
+
+Kết luận:
+AI không chỉ là một công nghệ, mà là một cuộc cách mạng đang định hình lại cách chúng ta sống, làm việc và tương tác với thế giới. Hiểu biết về AI và cách nó hoạt động là điều cần thiết cho mọi người trong thời đại số hóa này.`;
       
       setExtractedText(mockText);
       toast({
         title: "Upload thành công!",
-        description: `File ${file.name} đã được xử lý và sẵn sàng phân tích.`,
+        description: `File ${file.name} đã được xử lý và sẵn sàng phân tích với AI.`,
       });
     } catch (error) {
+      console.error('Error processing file:', error);
       toast({
         title: "Lỗi upload",
         description: "Không thể xử lý file PDF. Vui lòng thử lại.",

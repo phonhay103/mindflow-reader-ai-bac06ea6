@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Send, Bot, User, Lightbulb } from 'lucide-react';
+import { createChain, formatChatHistory } from '@/lib/ai';
+import { useToast } from '@/hooks/use-toast';
 
 interface Message {
   id: string;
@@ -27,7 +29,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ extractedText }) =
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [chatHistory, setChatHistory] = useState<{ role: string; content: string }[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   const suggestions = [
     "Tóm tắt chương đầu tiên",
@@ -59,36 +63,56 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ extractedText }) =
     setInputValue('');
     setIsTyping(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const aiResponse: Message = {
+    try {
+      // Create AI response using Google AI
+      const chain = createChain(formatChatHistory(chatHistory));
+      const prompt = `Bạn là một AI assistant chuyên về phân tích sách và văn bản. Dựa trên nội dung sau đây:
+
+${extractedText}
+
+Hãy trả lời câu hỏi của người dùng một cách chi tiết và hữu ích bằng tiếng Việt:
+
+Câu hỏi: ${text}
+
+Trả lời dựa trên nội dung đã được cung cấp và kiến thức của bạn.`;
+
+      const aiResponse = await chain.invoke(prompt);
+
+      const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: generateAIResponse(text),
+        text: aiResponse,
         sender: 'ai',
         timestamp: new Date()
       };
       
-      setMessages(prev => [...prev, aiResponse]);
+      setMessages(prev => [...prev, aiMessage]);
+      
+      // Update chat history
+      setChatHistory(prev => [...prev, 
+        { role: "human", content: text },
+        { role: "assistant", content: aiResponse }
+      ]);
+
+    } catch (error) {
+      console.error('Error generating AI response:', error);
+      
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: 'Xin lỗi, tôi không thể trả lời câu hỏi này lúc này. Vui lòng thử lại sau.',
+        sender: 'ai',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+      
+      toast({
+        title: "Lỗi AI Chat",
+        description: "Không thể tạo phản hồi. Vui lòng thử lại.",
+        variant: "destructive",
+      });
+    } finally {
       setIsTyping(false);
-    }, 1500);
-  };
-
-  const generateAIResponse = (userQuestion: string): string => {
-    const responses = {
-      "tóm tắt": "Dựa trên nội dung đã phân tích, cuốn sách tập trung vào việc giới thiệu các khái niệm cơ bản về AI và machine learning. Tác giả trình bày một cách dễ hiểu về cách AI hoạt động và ứng dụng trong thực tế.",
-      "khái niệm": "Các khái niệm chính bao gồm: Machine Learning, Deep Learning, Neural Networks, và các thuật toán AI cơ bản. Cuốn sách cũng đề cập đến ethical AI và tương lai của công nghệ này.",
-      "thông điệp": "Tác giả muốn truyền tải rằng AI không phải là thứ gì đó xa vời mà là công nghệ có thể được áp dụng để giải quyết các vấn đề thực tế. Quan trọng là phải hiểu và sử dụng AI một cách có trách nhiệm.",
-      "điểm mới": "Điểm mới lạ là cách tác giả kết hợp lý thuyết với các ví dụ thực tế, giúp người đọc dễ dàng hình dung và áp dụng kiến thức vào công việc.",
-      "áp dụng": "Kiến thức trong sách có thể áp dụng vào nhiều lĩnh vực như phân tích dữ liệu, tự động hóa quy trình, và phát triển sản phẩm thông minh."
-    };
-
-    for (const [key, response] of Object.entries(responses)) {
-      if (userQuestion.toLowerCase().includes(key)) {
-        return response;
-      }
     }
-
-    return "Đây là một câu hỏi thú vị! Dựa trên nội dung sách, tôi có thể giúp bạn hiểu rõ hơn về chủ đề này. Bạn có thể cụ thể hóa câu hỏi để tôi trả lời chính xác hơn không?";
   };
 
   return (
@@ -118,7 +142,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ extractedText }) =
                   {message.sender === 'ai' && (
                     <Bot className="w-4 h-4 mt-1 flex-shrink-0" />
                   )}
-                  <p className="text-sm">{message.text}</p>
+                  <p className="text-sm whitespace-pre-wrap">{message.text}</p>
                   {message.sender === 'user' && (
                     <User className="w-4 h-4 mt-1 flex-shrink-0" />
                   )}
@@ -158,6 +182,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ extractedText }) =
                 size="sm"
                 onClick={() => sendMessage(suggestion)}
                 className="text-xs"
+                disabled={isTyping}
               >
                 {suggestion}
               </Button>
@@ -169,8 +194,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ extractedText }) =
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Hỏi về nội dung sách..."
-              onKeyPress={(e) => e.key === 'Enter' && sendMessage(inputValue)}
+              onKeyPress={(e) => e.key === 'Enter' && !isTyping && sendMessage(inputValue)}
               className="flex-1"
+              disabled={isTyping}
             />
             <Button 
               onClick={() => sendMessage(inputValue)}

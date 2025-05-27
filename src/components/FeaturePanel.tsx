@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Sparkles } from 'lucide-react';
@@ -14,10 +13,11 @@ export const FeaturePanel: React.FC<FeaturePanelProps> = ({
   onFeatureSelect,
   fileName
 }) => {
-  const { isAnalyzing, analysisResults, analyzeContent } = useAnalysis();
+  const { isAnalyzing, analysisResults, analyzeFeature } = useAnalysis();
 
   const handleAnalyzeContent = (feature: string) => {
-    analyzeContent(feature, extractedText, fileName, onFeatureSelect);
+    analyzeFeature(feature, extractedText);
+    onFeatureSelect(feature);
   };
 
   return (

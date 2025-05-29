@@ -1,31 +1,35 @@
 
-import { FileText, Map, HelpCircle, Clock, Network } from 'lucide-react';
-import { FeatureItem } from '@/types/feature';
+import { FileText, Network, HelpCircle, Clock, BarChart } from 'lucide-react';
 
-export const FEATURES: FeatureItem[] = [
+export const FEATURES = [
   {
     id: 'summary',
     title: 'Tóm tắt',
     icon: FileText,
-  },
-  {
-    id: 'mindmap',
-    title: 'Mind Map',
-    icon: Map,
+    description: 'Tạo bản tóm tắt ngắn gọn'
   },
   {
     id: 'knowledge-graph',
-    title: 'Knowledge Graph',
+    title: 'Mind Map',
     icon: Network,
+    description: 'Sơ đồ kiến thức trực quan'
   },
   {
     id: 'faq',
     title: 'FAQ',
     icon: HelpCircle,
+    description: 'Câu hỏi thường gặp'
   },
   {
     id: 'timeline',
     title: 'Timeline',
     icon: Clock,
+    description: 'Dòng thời gian sự kiện'
   },
+  {
+    id: 'key-insights',
+    title: 'Insight',
+    icon: BarChart,
+    description: 'Phân tích chuyên sâu'
+  }
 ];

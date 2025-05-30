@@ -44,7 +44,7 @@ export const useAnalysis = () => {
 
       const result = await chain.invoke(prompt);
       
-      let content = result;
+      let content: any = result;
       
       // Parse JSON for specific features
       if (feature === 'knowledge-graph') {

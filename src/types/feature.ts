@@ -11,7 +11,7 @@ export interface TimelineItem {
 
 export interface AnalysisResult {
   title: string;
-  content: any;
+  content: any; // Keep as any to handle different content types (string, objects, arrays)
 }
 
 export interface FeaturePanelProps {

@@ -6,7 +6,7 @@ const API_KEY = 'AIzaSyBvKMw4KxRzYCq7V6b0n5s9Qh2F3j8P1kL9'; // Replace with actu
 export const createChain = (chatHistory: Array<{ role: string; content: string }>) => {
   const model = new ChatGoogleGenerativeAI({
     apiKey: API_KEY,
-    modelName: 'gemini-pro',
+    model: 'gemini-pro', // Use 'model' instead of 'modelName'
     temperature: 0.7,
   });
 

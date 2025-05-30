@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Send, Bot, User, Lightbulb, Trash2, RefreshCw } from 'lucide-react';
-import { createChain, formatChatHistory } from '@/lib/ai';
+import { createChain } from '@/lib/ai';
 import { useToast } from '@/hooks/use-toast';
 
 interface Message {
@@ -84,7 +84,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ extractedText }) =
     setIsTyping(true);
 
     try {
-      const chain = createChain(formatChatHistory(chatHistory));
+      const chain = createChain(chatHistory); // Pass the array directly
       const prompt = `Bạn là một AI assistant chuyên về phân tích sách và văn bản. Dựa trên nội dung sau đây:
 
 ${extractedText}
